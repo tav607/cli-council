@@ -278,10 +278,15 @@ def stage1_first_opinions(question: str, verbose: bool = True, out_fn: Optional[
     if verbose:
         out("\n**📝 Stage 1: First Opinions**\n")
 
+    # 包装问题，添加格式约束（禁止表格）
+    formatted_question = f"""{question}
+
+【格式要求】请勿使用 Markdown 表格格式。如需展示对比或列表信息，请使用项目符号列表（如 - 或 •）或编号列表。"""
+
     results = {}
     with ThreadPoolExecutor(max_workers=len(CLIS)) as executor:
         futures = {
-            executor.submit(query_cli, name, config, question): name
+            executor.submit(query_cli, name, config, formatted_question): name
             for name, config in CLIS.items()
         }
         for future in as_completed(futures):
@@ -512,6 +517,8 @@ def stage3_final_response(
 4. 聚合排名显示的整体模型表现
 
 请取各家之长，纠正可能的错误，给出最佳答案。要求简洁而全面。
+
+【格式要求】请勿使用 Markdown 表格格式。如需展示对比或列表信息，请使用项目符号列表（如 - 或 •）或编号列表。
 
 最终答案："""
 
