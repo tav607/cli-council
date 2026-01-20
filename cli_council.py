@@ -45,7 +45,7 @@ class ReviewResult:
 # 注意：Claude CLI 需要 PTY 环境，在 PM2 等无 TTY 环境下使用 script 命令模拟
 CLIS = {
     "Codex": {          # Response A
-        "cmd": ["codex", "exec", "--skip-git-repo-check", "--enable", "web_search_request"],
+        "cmd": ["codex", "exec", "--skip-git-repo-check", "--enable", "web_search_request", "-c", "model_reasoning_effort=\"high\""],
     },
     "Gemini": {         # Response B
         "cmd": ["gemini"],  # MCP 已在 ~/.gemini/settings.json 中禁用
