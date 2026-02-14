@@ -82,6 +82,7 @@ def query_cli(name: str, config: dict, prompt: str, timeout: int = 300) -> CliRe
         with tempfile.TemporaryDirectory() as sandbox:
             # 设置环境变量，解决 Claude CLI 在无 TTY 环境下（如 PM2）挂起的问题
             env = os.environ.copy()
+            env.pop("CLAUDECODE", None)    # 允许在 Claude Code 会话内嵌套调用 claude CLI
             env.update({
                 "FORCE_COLOR": "0",        # 禁用颜色输出
                 "CI": "true",              # 模拟 CI 环境，禁用交互式功能
@@ -149,6 +150,7 @@ def query_chairman(prompt: str, timeout: int = 300) -> str:
         # 在临时目录中执行，避免 CLI 读取项目文件作为上下文
         with tempfile.TemporaryDirectory() as sandbox:
             env = os.environ.copy()
+            env.pop("CLAUDECODE", None)    # 允许在 Claude Code 会话内嵌套调用 claude CLI
             env.update({
                 "FORCE_COLOR": "0",
                 "CI": "true",
