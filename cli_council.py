@@ -42,7 +42,7 @@ class ReviewResult:
 
 
 # CLI 配置 (按 Response A/B/C 顺序排列)
-# 注意：Claude CLI 需要 PTY 环境，在 PM2 等无 TTY 环境下使用 script 命令模拟
+# 注意：Claude CLI 需要 PTY 环境，在无 TTY 环境下使用 script 命令模拟
 CLIS = {
     "Codex": {          # Response A
         "cmd": ["codex", "exec", "--skip-git-repo-check", "--enable", "web_search_request", "-c", "model_reasoning_effort=\"high\""],
@@ -51,7 +51,7 @@ CLIS = {
         "cmd": ["gemini"],  # MCP 已在 ~/.gemini/settings.json 中禁用
     },
     "Claude Code": {    # Response C
-        # 使用 script 命令模拟 PTY，解决 PM2 环境下 Claude CLI 挂起的问题
+        # 使用 script 命令模拟 PTY，解决无 TTY 环境下 Claude CLI 挂起的问题
         # use_script=True 表示需要用 script -c 包装命令
         "cmd": ["claude", "-p", "--permission-mode", "bypassPermissions", "--no-session-persistence"],
         "use_script": True,
@@ -60,7 +60,7 @@ CLIS = {
 
 # Chairman 配置 (使用 Claude Code CLI)
 CHAIRMAN_CMD = ["claude", "-p", "--permission-mode", "bypassPermissions", "--no-session-persistence"]
-CHAIRMAN_USE_SCRIPT = True  # 在 PM2 环境下需要用 script 模拟 PTY
+CHAIRMAN_USE_SCRIPT = True  # 在无 TTY 环境下需要用 script 模拟 PTY
 
 
 def query_cli(name: str, config: dict, prompt: str, timeout: int = 300) -> CliResult:
@@ -70,7 +70,7 @@ def query_cli(name: str, config: dict, prompt: str, timeout: int = 300) -> CliRe
         base_cmd = config["cmd"]
 
         # 如果配置了 use_script，使用 script 命令模拟 PTY
-        # 这是为了解决 Claude CLI 在 PM2 等无 TTY 环境下挂起的问题
+        # 这是为了解决 Claude CLI 在无 TTY 环境下挂起的问题
         if config.get("use_script"):
             # 构建完整的命令字符串，然后用 script -q -c 包装
             full_cmd_str = " ".join(shlex.quote(arg) for arg in base_cmd) + " " + shlex.quote(prompt)
@@ -80,7 +80,7 @@ def query_cli(name: str, config: dict, prompt: str, timeout: int = 300) -> CliRe
 
         # 在临时目录中执行，避免 CLI 读取项目文件作为上下文
         with tempfile.TemporaryDirectory() as sandbox:
-            # 设置环境变量，解决 Claude CLI 在无 TTY 环境下（如 PM2）挂起的问题
+            # 设置环境变量，解决 Claude CLI 在无 TTY 环境下挂起的问题
             env = os.environ.copy()
             env.pop("CLAUDECODE", None)    # 允许在 Claude Code 会话内嵌套调用 claude CLI
             env.update({
